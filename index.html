@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECG → Echo · Cardiac screening over WhatsApp · Bangalore AI Labs</title>
+<meta name="description" content="A health worker photographs a printed 12-lead ECG and sends it on WhatsApp. Within about a minute they get a structured cardiac screening assessment and a referral recommendation, in their own language.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF4F4;
+    --paper-deep:#FBE7E8;
+    --grid-fine:rgba(224,126,131,.20);
+    --grid-bold:rgba(206,72,81,.34);
+    --ink:#171419;
+    --ink-soft:#615A62;
+    --signal:#BE1F33;
+    --live:#0A6A58;
+    --rule:rgba(23,20,25,.14);
+    --wa-in:#FFFFFF;
+    --wa-out:#DFF5DA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background-color:var(--paper);
+    background-image:
+      repeating-linear-gradient(to right,var(--grid-bold) 0 1px,transparent 1px 40px),
+      repeating-linear-gradient(to bottom,var(--grid-bold) 0 1px,transparent 1px 40px),
+      repeating-linear-gradient(to right,var(--grid-fine) 0 1px,transparent 1px 8px),
+      repeating-linear-gradient(to bottom,var(--grid-fine) 0 1px,transparent 1px 8px);
+    color:var(--ink);
+    font-family:"Source Serif 4",Georgia,serif;
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  .mono{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.13em;text-transform:uppercase}
+  h1,h2,h3{font-family:Archivo,system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;line-height:1.06}
+
+  .masthead{border-bottom:1px solid var(--rule);background:rgba(255,244,244,.88);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20}
+  .masthead .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:20px}
+  .brand{font-family:Archivo;font-weight:800;font-size:1.02rem;letter-spacing:-.02em}
+  .brand span{color:var(--signal)}
+  .status{display:flex;align-items:center;gap:7px;color:var(--live)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--live);flex:none}
+  @media(prefers-reduced-motion:no-preference){.dot{animation:beat 2.4s ease-in-out infinite}}
+  @keyframes beat{0%,88%,100%{transform:scale(1);opacity:1}92%{transform:scale(1.9);opacity:.45}}
+
+  .hero{padding:74px 0 62px}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}
+  .eyebrow{color:var(--signal);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+  .eyebrow::after{content:"";height:1px;flex:1;background:var(--signal);opacity:.3}
+  h1{font-size:clamp(2.3rem,5.2vw,3.7rem);margin-bottom:22px}
+  h1 em{font-style:normal;color:var(--signal)}
+  .lede{font-size:1.13rem;color:var(--ink-soft);max-width:47ch;margin-bottom:30px}
+  .keyfacts{display:flex;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .keyfact{padding:16px 22px 16px 0;margin-right:22px;border-right:1px solid var(--rule)}
+  .keyfact:last-child{border-right:0;margin-right:0}
+  .keyfact b{display:block;font-family:Archivo;font-weight:800;font-size:1.45rem;line-height:1}
+  .keyfact .mono{color:var(--ink-soft);margin-top:6px;display:block}
+
+  .device{background:var(--paper-deep);border:1px solid var(--rule);border-radius:14px;padding:14px;box-shadow:0 18px 44px -26px rgba(23,20,25,.5)}
+  .device-bar{display:flex;align-items:center;gap:9px;padding:0 4px 12px;border-bottom:1px solid var(--rule);margin-bottom:14px}
+  .avatar{width:26px;height:26px;border-radius:50%;background:var(--signal);color:#fff;font-family:Archivo;font-weight:800;font-size:.6rem;display:grid;place-items:center;flex:none}
+  .device-bar .who{font-family:Archivo;font-weight:600;font-size:.82rem}
+  .thread{display:flex;flex-direction:column;gap:10px}
+  .bubble{max-width:88%;padding:10px 12px;border-radius:12px;font-size:.85rem;line-height:1.5}
+  .bubble.out{align-self:flex-end;background:var(--wa-out);border-bottom-right-radius:3px}
+  .bubble.in{align-self:flex-start;background:var(--wa-in);border-bottom-left-radius:3px;border:1px solid var(--rule)}
+  .stamp{font-family:"IBM Plex Mono",monospace;font-size:.6rem;color:var(--ink-soft);display:block;text-align:right;margin-top:5px}
+  .ecgshot{background:#fff;border:1px solid var(--rule);border-radius:7px;overflow:hidden;margin-bottom:7px}
+  .ecgshot svg{display:block;width:100%;height:auto}
+  .trace{fill:none;stroke:#12111A;stroke-width:2.1;stroke-linejoin:round;stroke-linecap:round}
+  @media(prefers-reduced-motion:no-preference){
+    .trace{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2.6s cubic-bezier(.3,.7,.4,1) .35s forwards}
+  }
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .verdict{font-family:"IBM Plex Mono",monospace;font-size:.72rem;line-height:1.8}
+  .verdict .k{color:var(--ink-soft)}
+  .verdict .flag{color:var(--signal);font-weight:500}
+
+  section{padding:62px 0;border-top:1px solid var(--rule)}
+  .sechead{margin-bottom:36px;max-width:62ch}
+  .sechead .mono{color:var(--signal);display:block;margin-bottom:14px}
+  h2{font-size:clamp(1.55rem,3vw,2.1rem);margin-bottom:14px}
+  .sechead p{color:var(--ink-soft)}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .step{background:var(--paper);padding:26px 22px}
+  .step .num{font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--signal);display:block;margin-bottom:14px}
+  .step h3{font-size:1.02rem;margin-bottom:8px}
+  .step p{font-size:.92rem;color:var(--ink-soft)}
+
+  .returns{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:0 44px}
+  .returns li{padding:18px 0;border-bottom:1px solid var(--rule);font-size:.95rem;color:var(--ink-soft)}
+  .returns b{color:var(--ink);font-family:Archivo;font-weight:600;font-size:.95rem;display:block;margin-bottom:3px}
+
+  .note{margin-top:26px;padding:16px 18px;border-left:2px solid var(--signal);background:rgba(190,31,51,.045);font-size:.93rem;color:var(--ink-soft)}
+  .note b{color:var(--ink);font-family:Archivo;font-weight:600}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+  .people{list-style:none}
+  .people li{padding:12px 0;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:18px;align-items:baseline}
+  .people .role{color:var(--ink-soft);font-size:.78rem;font-family:"IBM Plex Mono",monospace;text-align:right}
+
+  .cta{text-align:center;padding:78px 0}
+  .cta p{color:var(--ink-soft);max-width:50ch;margin:0 auto 30px}
+  .btn{display:inline-block;background:var(--ink);color:var(--paper);font-family:Archivo;font-weight:600;font-size:.95rem;padding:14px 30px;border-radius:2px;text-decoration:none;transition:background .18s ease}
+  .btn:hover,.btn:focus-visible{background:var(--signal)}
+  .alt{display:block;margin-top:18px;font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-soft)}
+  .alt a{color:var(--ink)}
+
+  footer{border-top:1px solid var(--rule);padding:26px 0 44px}
+  footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--ink-soft)}
+  a:focus-visible,.btn:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+
+  @media(max-width:880px){
+    .hero .wrap,.cols{grid-template-columns:1fr;gap:40px}
+    .steps,.returns{grid-template-columns:1fr}
+    .hero{padding:50px 0 42px}
+    section{padding:46px 0}
+    body{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brand">ECG <span>→</span> Echo</div>
+    <div class="status mono"><span class="dot"></span>Live on WhatsApp</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow mono">Cardiac screening · Bangalore AI Labs</div>
+      <h1>An ECG photograph is<br>enough to <em>ask the question.</em></h1>
+      <p class="lede">A health worker photographs a printed 12-lead ECG and sends it on WhatsApp. Within about a minute they get a structured assessment of how well the heart is pumping, and a clear answer on whether this patient needs an echocardiogram — in their own language.</p>
+      <div class="keyfacts">
+        <div class="keyfact"><b>&lt;60s</b><span class="mono">Photo to assessment</span></div>
+        <div class="keyfact"><b>3</b><span class="mono">Languages, live</span></div>
+        <div class="keyfact"><b>0</b><span class="mono">New devices needed</span></div>
+      </div>
+    </div>
+
+    <div class="device">
+      <div class="device-bar">
+        <div class="avatar">EE</div>
+        <div class="who">ECG → Echo</div>
+        <div class="status mono" style="margin-left:auto"><span class="dot"></span>Online</div>
+      </div>
+      <div class="thread">
+        <div class="bubble out">
+          <div class="ecgshot">
+            <svg viewBox="0 0 420 96" role="img" aria-label="Photograph of a printed ECG rhythm strip">
+              <rect width="420" height="96" fill="#FFF8F8"/>
+              <g stroke="rgba(224,126,131,.28)" stroke-width="1">
+                <path d="M0 12h420M0 24h420M0 36h420M0 48h420M0 60h420M0 72h420M0 84h420"/>
+                <path d="M12 0v96M24 0v96M36 0v96M48 0v96M60 0v96M72 0v96M84 0v96M96 0v96M108 0v96M120 0v96M132 0v96M144 0v96M156 0v96M168 0v96M180 0v96M192 0v96M204 0v96M216 0v96M228 0v96M240 0v96M252 0v96M264 0v96M276 0v96M288 0v96M300 0v96M312 0v96M324 0v96M336 0v96M348 0v96M360 0v96M372 0v96M384 0v96M396 0v96M408 0v96"/>
+              </g>
+              <path class="trace" d="M0 60 L18 60 L24 54 L30 60 L38 60 L42 66 L48 30 L54 78 L60 60 L74 60 L82 50 L90 60 L104 60
+                L122 60 L128 54 L134 60 L142 60 L146 66 L152 30 L158 78 L164 60 L178 60 L186 50 L194 60 L208 60
+                L226 60 L232 54 L238 60 L246 60 L250 66 L256 30 L262 78 L268 60 L282 60 L290 50 L298 60 L312 60
+                L330 60 L336 54 L342 60 L350 60 L354 66 L360 30 L366 78 L372 60 L386 60 L394 50 L402 60 L420 60"/>
+              <text x="7" y="14" font-family="IBM Plex Mono,monospace" font-size="7" fill="#8A6B6E">II</text>
+              <text x="352" y="91" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="#8A6B6E">25mm/s · 10mm/mV</text>
+            </svg>
+          </div>
+          <span class="stamp">10:42</span>
+        </div>
+
+        <div class="bubble in">
+          <div class="verdict">
+            <span class="k">Pumping strength</span> &nbsp;<span class="flag">reduced</span><br>
+            <span class="k">Wall motion</span> &nbsp;<span class="flag">abnormal</span><br>
+            <span class="k">Confidence</span> &nbsp;high
+          </div>
+          <div style="margin-top:9px;font-size:.83rem"><b>Refer for echocardiography.</b> Decision support only — not a diagnosis.</div>
+          <span class="stamp">10:42</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="sechead">
+      <span class="mono">The gap</span>
+      <h2>ECG machines are everywhere. Echo is not.</h2>
+      <p>Echocardiography is the reference standard for assessing how well the heart pumps, but it needs an ultrasound machine and a trained operator — both scarce outside large hospitals. An ECG and a phone are almost everywhere. This is a triage layer: it helps decide who should get the scarce echo slot first.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="num">Step 01</span><h3>Photograph the strip</h3><p>Any phone camera, any printed 12-lead ECG. No new hardware, no app to install, no change to how the clinic already works.</p></div>
+      <div class="step"><span class="num">Step 02</span><h3>Send it on WhatsApp</h3><p>An interface health workers already use all day. Nothing to learn and nothing to log into.</p></div>
+      <div class="step"><span class="num">Step 03</span><h3>Act on the reply</h3><p>A structured assessment comes back in about a minute, with a referral recommendation the clinician can act on or overrule.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sechead">
+      <span class="mono">The reply</span>
+      <h2>What comes back.</h2>
+      <p>Written for the person holding the phone, not for a data scientist.</p>
+    </div>
+    <ul class="returns">
+      <li><b>How well the heart is pumping</b>An estimate of pumping strength, expressed the way a referring clinician would read it.</li>
+      <li><b>Wall-motion assessment</b>Whether parts of the heart muscle appear to be moving abnormally.</li>
+      <li><b>A confidence indicator</b>How strongly the system holds the result, so a borderline case is visibly borderline.</li>
+      <li><b>A referral recommendation</b>Measured against a threshold the supervising clinician sets for their own site and referral capacity.</li>
+      <li><b>A heat-map</b>Which parts of the trace drove the result, so the clinician can sanity-check it rather than take it on trust.</li>
+      <li><b>In three languages</b>English, Kannada and Hindi, chosen to match the health worker rather than the hospital.</li>
+    </ul>
+    <div class="note">
+      <b>A screening aid, not a diagnosis.</b> This is research-stage decision support. It is a first-pass filter that helps prioritise who gets an echocardiogram sooner — it does not replace one, and a normal result does not exclude disease. It is not a regulated medical device and carries no regulatory clearance. Full validation methodology and results are available to clinical partners on request.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap cols">
+    <div>
+      <div class="sechead">
+        <span class="mono">Where it stands</span>
+        <h2>Running, and looking for partners.</h2>
+        <p>The system is deployed and in use with clinicians in three languages. Referral thresholds are adjustable per site rather than fixed by us, so a centre can tune caution to its own capacity. We are now looking for cardiology centres willing to collaborate on multi-centre data collection and independent validation — the step that matters most for taking this beyond research.</p>
+      </div>
+    </div>
+    <div>
+      <div class="sechead"><span class="mono">Team</span><h2>Who built it.</h2></div>
+      <ul class="people">
+        <li><span>Mohammed Bilal</span><span class="role">AI/ML Research Engineer</span></li>
+        <li><span>Dr. Azhar Wahab Tadas</span><span class="role">Cardiology · clinical lead</span></li>
+        <li><span>Dr. Mehboob Pasha</span><span class="role">Radiology · ECG interpretation</span></li>
+        <li><span>Bangalore AI Labs</span><span class="role">bailab.in</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Talk to us</h2>
+    <p>For clinical collaboration, validation partnerships, or access for your centre. Clinician access is onboarded individually with a supervising physician.</p>
+    <a class="btn" href="mailto:bilal@bailab.in?cc=drazhar@bailab.in&subject=ECG%20to%20Echo%20enquiry">Get in touch</a>
+    <span class="alt">bilal@bailab.in &nbsp;·&nbsp; drazhar@bailab.in &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/mohammedbilal11">linkedin.com/in/mohammedbilal11</a></span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">Bangalore AI Labs · ECG → Echo</span>
+    <span class="mono">Research decision support · not a medical device</span>
+  </div>
+</footer>
+
+</body>
+</html>
