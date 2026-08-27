@@ -97,6 +97,11 @@
   .returns li{padding:18px 0;border-bottom:1px solid var(--rule);font-size:.95rem;color:var(--ink-soft)}
   .returns b{color:var(--ink);font-family:Archivo;font-weight:600;font-size:.95rem;display:block;margin-bottom:3px}
 
+  .scores{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .score{background:var(--paper);padding:26px 20px}
+  .score b{display:block;font-family:Archivo;font-weight:800;font-size:2.1rem;line-height:1;color:var(--signal);margin-bottom:12px;letter-spacing:-.03em}
+  .score .mono{color:var(--ink-soft);line-height:1.7}
+
   .note{margin-top:26px;padding:16px 18px;border-left:2px solid var(--signal);background:rgba(190,31,51,.045);font-size:.93rem;color:var(--ink-soft)}
   .note b{color:var(--ink);font-family:Archivo;font-weight:600}
 
@@ -116,6 +121,7 @@
   footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--ink-soft)}
   a:focus-visible,.btn:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
 
+  @media(max-width:980px){.scores{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:880px){
     .hero .wrap,.cols{grid-template-columns:1fr;gap:40px}
     .steps,.returns{grid-template-columns:1fr}
@@ -218,7 +224,26 @@
       <li><b>In three languages</b>English, Kannada and Hindi, chosen to match the health worker rather than the hospital.</li>
     </ul>
     <div class="note">
-      <b>A screening aid, not a diagnosis.</b> This is research-stage decision support. It is a first-pass filter that helps prioritise who gets an echocardiogram sooner — it does not replace one, and a normal result does not exclude disease. It is not a regulated medical device and carries no regulatory clearance. Full validation methodology and results are available to clinical partners on request.
+      <b>A screening aid, not a diagnosis.</b> This is research-stage decision support. It is a first-pass filter that helps prioritise who gets an echocardiogram sooner — it does not replace one, and a normal result does not exclude disease. It is not a regulated medical device and carries no regulatory clearance.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sechead">
+      <span class="mono">Results</span>
+      <h2>Measured against echocardiography.</h2>
+      <p>Every figure below is an out-of-fold prediction from 5-fold cross-validation on 556 paired ECG–echocardiography cases — each prediction made by a model that had never seen that patient.</p>
+    </div>
+    <div class="scores">
+      <div class="score"><b>0.788</b><span class="mono">Severe-EF detection<br>AUROC</span></div>
+      <div class="score"><b>0.703</b><span class="mono">Wall-motion detection<br>AUROC</span></div>
+      <div class="score"><b>0.611</b><span class="mono">Sensitivity<br>cases caught</span></div>
+      <div class="score"><b>0.720</b><span class="mono">Specificity<br>correctly cleared</span></div>
+    </div>
+    <div class="note">
+      <b>Read these honestly.</b> The severe-EF figure rests on 46 severely reduced cases, not a handful — that is what makes it worth quoting. But at the current threshold the tool catches roughly six in ten patients with a significant wall-motion abnormality, and the data comes from a single cardiology centre with no external or prospective validation yet. Full methodology and the complete results report are available to clinical partners on request.
     </div>
   </div>
 </section>
